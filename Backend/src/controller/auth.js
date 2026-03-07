@@ -114,19 +114,17 @@ const updateProfile = async (req, res) => {
   try {
     const { fullname, email, phoneNumber, bio, skills } = req.body;
     const file = req.file;
-    if (!fullname || !email || !phoneNumber || !bio || !skills) {
-      return res.status(400).json({
-        message: "Something is missing",
-        success: false,
-      });
-    }
+
     // console.log(fullname, email, phoneNumber, bio, skills);
 
     //cloudaniry here.............
+    let skillsArray;
+    if (skills) {
+      skillsArray = Array.isArray(skills)
+        ? skills
+        : skills.split(",").map((s) => s.trim());
+    }
 
-    const skillsArray = Array.isArray(skills)
-      ? skills
-      : skills.split(",").map((s) => s.trim());
     const UserId = req.id; //middleware authentication
     let user = await User.findById(UserId);
     if (!user) {
@@ -136,10 +134,11 @@ const updateProfile = async (req, res) => {
       });
     }
     //Updation
-    ((user.fullname = fullname),
-      (user.email = email),
-      (user.phoneNumber = phoneNumber),
-      (user.profile.skills = skillsArray));
+    if (fullname) user.fullname = fullname;
+    if (phoneNumber) user.phoneNumber = phoneNumber;
+    if (email) user.email = email;
+    if (bio) user.profile.bio = bio;
+    if (skillsArray) user.profile.skills = skillsArray;
 
     //resum remaining................
 
@@ -149,8 +148,9 @@ const updateProfile = async (req, res) => {
       message: `Profile Updated Successfully`,
       user: {
         _id: user._id,
-        name: user.name,
+        name: user.fullname,
         email: user.email,
+        phoneNumber: user.phoneNumber,
         role: user.role,
         profile: user.profile,
       },

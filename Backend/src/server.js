@@ -2,6 +2,7 @@ const express = require("express");
 const app = express();
 
 const userRouter = require('./routes/user');
+const companyRoute = require('./routes/company');
 
 const cookieParser = require("cookie-parser");
 const cors = require("cors");
@@ -18,6 +19,7 @@ const corsOption = {
 DbConnect();
 app.use(cors(corsOption));
 
-app.use('/', userRouter);
+app.use('/auth', userRouter);
+app.use('/company', companyRoute);
 
 module.exports = app;
