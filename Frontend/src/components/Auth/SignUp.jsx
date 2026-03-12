@@ -7,6 +7,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { useState } from "react";
 import axios from "axios";
 import { toast } from "sonner";
+import { USER_API_END_POINT } from "@/Utils/constant";
 
 const SignUp = () => {
   const [input, setinput] = useState({
@@ -38,7 +39,7 @@ const SignUp = () => {
       formData.append("file", input.file);
     }
     try {
-      const res = await axios.post(`{USER_API_END_POINT}/register`, formData, {
+      const res = await axios.post(`${USER_API_END_POINT}/register`, formData, {
         headers:{
           "Content-Type":"multipart/form-data"
         },
@@ -50,6 +51,7 @@ const SignUp = () => {
       }
     } catch (error) {
       console.log("Inrernal server Error: ", error);
+      toast.error(error.response.data.message)
     }
   };
   return (
@@ -124,7 +126,7 @@ const SignUp = () => {
                 <Input
                   type="radio"
                   name="role"
-                  value="student"
+                  value="Student"
                   checked={input.role === "student"}
                   onChange={chageEventHandler}
                   className="cursor-pointer"
@@ -135,8 +137,8 @@ const SignUp = () => {
                 <Input
                   type="radio"
                   name="role"
-                  value="recruiter"
-                  checked={input.role === "recruiter"}
+                  value="Recruiter"
+                  checked={input.role === "Recruiter"}
                   onChange={chageEventHandler}
                   className="cursor-pointer"
                 />

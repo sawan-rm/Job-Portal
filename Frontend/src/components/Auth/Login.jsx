@@ -3,8 +3,11 @@ import { Label } from "@/components/ui/label";
 import { RadioGroup } from "@/components/ui/radio-group";
 import { Input } from "@/components/ui/input";
 import { Button } from "../ui/button";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { useState } from "react";
+import axios from "axios";
+import { toast } from "sonner";
+import { USER_API_END_POINT } from "@/Utils/constant";
 
 const Login = () => {
   const [input, setinput] = useState({
@@ -12,13 +15,30 @@ const Login = () => {
     password: "",
     role: "",
   });
-
+  
   const chageEventHandler = (e) => {
     setinput({ ...input, [e.target.name]: e.target.value });
   };
+
+  const navigate = useNavigate();
+
   const SubmitHandler = async (e) => {
     e.preventDefault();
-    console.log(input);
+    try {
+      const res = await axios.post(`${USER_API_END_POINT}/login`,input, {
+        headers: {
+          "Content-Type": "application/json"
+        },
+        withCredentials: true,
+      });
+      if (res.data.success) {
+        navigate('/');
+        toast.success(res.data.message);
+      }
+    } catch (error) {
+      console.log("Inrernal server Error: ", error);
+      toast.error(error.response.data.message)
+    }
   };
   return (
     <div>
@@ -61,7 +81,7 @@ const Login = () => {
                 <Input
                   type="radio"
                   name="role"
-                  value="student"
+                  value="Student"
                   checked={input.role === "student"}
                   onChange={chageEventHandler}
                   className="cursor-pointer"
@@ -72,7 +92,7 @@ const Login = () => {
                 <Input
                   type="radio"
                   name="role"
-                  value="recruiter"
+                  value="Recruiter"
                   checked={input.role === "recruiter"}
                   onChange={chageEventHandler}
                   className="cursor-pointer"
