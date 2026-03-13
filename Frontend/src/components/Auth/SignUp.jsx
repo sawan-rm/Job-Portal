@@ -8,6 +8,9 @@ import { useState } from "react";
 import axios from "axios";
 import { toast } from "sonner";
 import { USER_API_END_POINT } from "@/Utils/constant";
+import { useDispatch, useSelector } from "react-redux";
+import { setLoading } from "@/redux/authSlice";
+import { Loader2 } from "lucide-react";
 
 const SignUp = () => {
   const [input, setinput] = useState({
@@ -18,6 +21,8 @@ const SignUp = () => {
     role: "",
     file: "",
   });
+  const { loading } = useSelector((store) => store.auth);
+  const dispatch = useDispatch();
   const navigate = useNavigate();
 
   const chageEventHandler = (e) => {
@@ -39,6 +44,7 @@ const SignUp = () => {
       formData.append("file", input.file);
     }
     try {
+      dispatch(setLoading(true));
       const res = await axios.post(`${USER_API_END_POINT}/register`, formData, {
         headers:{
           "Content-Type":"multipart/form-data"
@@ -52,6 +58,8 @@ const SignUp = () => {
     } catch (error) {
       console.log("Inrernal server Error: ", error);
       toast.error(error.response.data.message)
+    }finally{
+      dispatch(setLoading(false));
     }
   };
   return (
@@ -127,14 +135,14 @@ const SignUp = () => {
                   type="radio"
                   name="role"
                   value="Student"
-                  checked={input.role === "student"}
+                  checked={input.role === "Student"}
                   onChange={chageEventHandler}
                   className="cursor-pointer"
                 />
                 <Label htmlFor="r1">Student</Label>
               </div>
               <div className="flex items-center space-x-2">
-                <Input
+                <input
                   type="radio"
                   name="role"
                   value="Recruiter"
@@ -155,12 +163,18 @@ const SignUp = () => {
               />
             </div>
           </div>
-          <Button
-            type="submit"
-            className="w-full my-4 bg-black text-white hover:opacity-80"
-          >
-            SignUp
-          </Button>
+          {loading ? (
+            <Button className="w-full my-4  bg-black text-white hover:opacity-80"> <Loader2 className="mr-2 h-4 w-4 animate-spin"/>
+              Please Wait...
+            </Button>
+          ) : (
+            <Button
+              type="submit"
+              className="w-full my-4 bg-black text-white hover:opacity-80"
+            >
+              SignUp
+            </Button>
+          )}
           <span className="text-sm">
             Already have an account?{" "}
             <Link to="/login" className="text-blue-600">

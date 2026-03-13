@@ -1,0 +1,21 @@
+/* .radio-custom {
+  width: 14px;
+  height: 14px;
+  border: 1.5px solid #9ca3af; 
+  border-radius: 50%;
+  position: relative;
+  cursor: pointer;
+  background: white;
+}
+
+.radio-custom:checked::after {
+  content: "";
+  width: 6px;
+  height: 6px;
+  background: #F97316; 
+  border-radius: 50%;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+} */
