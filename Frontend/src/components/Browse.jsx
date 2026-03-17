@@ -13,7 +13,7 @@ const Browse = () => {
                 {
                 RandomJobs.map((items, index) => {
                     return (
-                        <Job/>
+                        <Job key={index}/>
                     )
                 })
             }
@@ -23,5 +23,4 @@ const Browse = () => {
     </div>
   )
 }
-// 5:53
 export default Browse

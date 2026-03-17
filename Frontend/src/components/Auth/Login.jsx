@@ -8,7 +8,7 @@ import axios from "axios";
 import { toast } from "sonner";
 import { USER_API_END_POINT } from "@/Utils/constant";
 import { useDispatch, useSelector } from "react-redux";
-import { setLoading } from "@/redux/authSlice";
+import { setLoading, setUser } from "@/redux/authSlice";
 import { Loader, Loader2 } from "lucide-react";
 
 const Login = () => {
@@ -36,6 +36,7 @@ const Login = () => {
         withCredentials: true,
       });
       if (res.data.success) {
+        dispatch(setUser(res.data.message));
         navigate("/");
         toast.success(res.data.message);
       }
@@ -66,7 +67,7 @@ const Login = () => {
               name="email"
               onChange={chageEventHandler}
               id="email"
-              placeholder="user@gmail.com"
+className="w-full mt-1 px-1 py-2 border-b border-gray-300 focus:outline-none focus:border-black"              placeholder="user@gmail.com"
             />
           </div>
 
@@ -80,6 +81,7 @@ const Login = () => {
               name="password"
               onChange={chageEventHandler}
               id="password"
+              className="w-full mt-1 px-1 py-2 border-b border-gray-300 focus:outline-none focus:border-black"
               placeholder="Password"
             />
           </div>
