@@ -1,15 +1,35 @@
 import React from "react";
 import { Popover, PopoverTrigger, PopoverContent } from "../ui/popover";
 import { Button } from "../ui/button";
-// import { useDispatch } from "react-redux";
 import { AvatarImage, Avatar } from "../ui/avatar";
 import { LogOut, User2 } from "lucide-react";
-import { Link } from "react-router-dom";
-import { useSelector } from "react-redux";
+import { Link, useNavigate } from "react-router-dom";
+import { useDispatch, useSelector } from "react-redux";
+import { toast } from "sonner";
+import axios from "axios";
+import { USER_API_END_POINT } from "@/Utils/constant";
+import { setUser } from "@/redux/authSlice";
 
 const NavBar = () => {
-  // const user = true;
-  const {user} = useSelector(store=>store.auth);
+  const { user } = useSelector((store) => store.auth);
+  const dispatch = useDispatch();
+  const navigate = useNavigate();
+  console.log("Redux User:", user);
+  const logoutHandler = async () => {
+    try {
+      const res = await axios.get(`${USER_API_END_POINT}/logout`, {
+        withCredentials: true,
+      });
+      if (res.data.success) {
+        dispatch(setUser(null));
+        navigate("/");
+        toast.success(res.data.message);
+      }
+    } catch (error) {
+      console.log(error);
+      toast.error(error?.response?.data?.message || "Logout failed");
+    }
+  };
   return (
     <div className="bg-white">
       <div className="flex items-center justify-between mx-auto max-w-7xl h-16">
@@ -53,7 +73,7 @@ const NavBar = () => {
               <PopoverTrigger asChild>
                 <Avatar className="cursor-pointer rounded-full hover:scale-105 transition">
                   <AvatarImage
-                    src="https://github.com/shadcn.png"
+                    src={user?.profile?.profilePhoto || "/default-avatar.png"}
                     alt="@shadcn"
                   />
                 </Avatar>
@@ -63,25 +83,29 @@ const NavBar = () => {
                   <div className="flex gap-2">
                     <Avatar className="cursor-pointer">
                       <AvatarImage
-                        src="https://github.com/shadcn.png"
+                        src={user?.profile?.profilePhoto || "/default-avatar.png"}
                         alt="@shadcn"
                       />
                     </Avatar>
                     <div className="flex flex-col">
-                      <h4 className="font-medium">Test-user</h4>
+                      <h4 className="font-medium">{user?.fullname}</h4>
                       <p className="text-sm text-muted-foreground">
-                        Lorem ipsum dolor sit amet.
+                        {user?.profile?.bio}
                       </p>
                     </div>
                   </div>
                   <div className="flex flex-col my-2 text-gray-600">
                     <div className="flex w-fit my-1 items-center gap-2 cursor-pointer">
                       <User2 size={17} />
-                      <Button variant="link"><Link to="/profile">View profile</Link></Button>
+                      <Button variant="link">
+                        <Link to="/profile">View profile</Link>
+                      </Button>
                     </div>
                     <div className="flex w-fit my-1 items-center gap-2 cursor-pointer">
                       <LogOut size={17} />
-                      <Button variant="link">LogOut</Button>
+                      <Button onClick={logoutHandler} variant="link">
+                        LogOut
+                      </Button>
                     </div>
                   </div>
                 </div>
@@ -95,3 +119,4 @@ const NavBar = () => {
 };
 
 export default NavBar;
+// 7:46

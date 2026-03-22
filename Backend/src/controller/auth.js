@@ -1,18 +1,28 @@
 const User = require("../model/user");
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
+const getDataUri = require("../utils/dataUri");
+const cloudinary = require("../utils/Cloudinary");
 
 const register = async (req, res) => {
   try {
     const { fullname, email, phoneNumber, password, role } = req.body;
     // console.log(fullname, email, phoneNumber, password, role);
-    
+
     if (!fullname || !email || !phoneNumber || !password || !role) {
       return res.status(400).json({
         message: "Something is missing",
         success: false,
       });
     }
+    //cloudinary here....
+    const file = req.file;
+    let cloudResponse;
+    if (file) {
+      const fileUri = getDataUri(file);
+      cloudResponse = await cloudinary.uploader.upload(fileUri.content);
+    }
+
     const user = await User.findOne({ email });
     if (user)
       return res.status(400).json({
@@ -20,14 +30,20 @@ const register = async (req, res) => {
         success: false,
       });
     const hashedPassword = await bcrypt.hash(password, 10);
-    await User.create({
+    const userData = {
       fullname,
       email,
       phoneNumber,
       password: hashedPassword,
       role,
-    });
+      profile: {},
+    };
 
+    if(cloudResponse) {
+      userData.profile.profilePhoto = cloudResponse.secure_url;
+    }
+    await User.create(userData);
+    
     return res.status(200).json({
       message: "Account created Successfully",
       success: true,
@@ -88,7 +104,7 @@ const login = async (req, res) => {
       message: `Welcome back ${user.fullname}`,
       user: {
         _id: user._id,
-        name: user.name,
+        fullname: user.fullname,
         email: user.email,
         role: user.role,
         profile: user.profile,
@@ -117,9 +133,22 @@ const updateProfile = async (req, res) => {
     const { fullname, email, phoneNumber, bio, skills } = req.body;
     const file = req.file;
 
-    // console.log(fullname, email, phoneNumber, bio, skills);
+    const userId = req.id;
+    let user = await User.findById(userId);
 
-    //cloudaniry here.............
+    if (!user) {
+      return res.status(401).json({
+        message: "User not found",
+        success: false,
+      });
+    }
+
+    // Ensure profile exists
+    if (!user.profile) {
+      user.profile = {};
+    }
+
+    // Skills handling
     let skillsArray;
     if (skills) {
       skillsArray = Array.isArray(skills)
@@ -127,42 +156,40 @@ const updateProfile = async (req, res) => {
         : skills.split(",").map((s) => s.trim());
     }
 
-    const UserId = req.id; //middleware authentication
-    let user = await User.findById(UserId);
-    if (!user) {
-      return res.status(401).json({
-        message: "User not found.",
-        success: false,
+    // Upload only if file exists
+    if (file) {
+      const fileUri = getDataUri(file);
+      const cloudResponse = await cloudinary.uploader.upload(fileUri.content, {
+        resource_type: "raw",
+        access_mode: "public",
       });
+
+      user.profile.resume = cloudResponse.secure_url;
+      user.profile.resumeOriginalName = file.originalname;
     }
-    //Updation
+
+    // Update fields
     if (fullname) user.fullname = fullname;
-    if (phoneNumber) user.phoneNumber = phoneNumber;
     if (email) user.email = email;
+    if (phoneNumber) user.phoneNumber = phoneNumber;
     if (bio) user.profile.bio = bio;
     if (skillsArray) user.profile.skills = skillsArray;
-
-    //resum remaining................
 
     await user.save();
 
     return res.status(200).json({
-      message: `Profile Updated Successfully`,
-      user: {
-        _id: user._id,
-        name: user.fullname,
-        email: user.email,
-        phoneNumber: user.phoneNumber,
-        role: user.role,
-        profile: user.profile,
-      },
+      message: "Profile Updated Successfully",
+      user,
       success: true,
     });
   } catch (error) {
     console.log("Internal server error", error);
+    return res.status(500).json({
+      message: "Internal server error",
+      success: false,
+    });
   }
 };
-
 module.exports = {
   register,
   login,

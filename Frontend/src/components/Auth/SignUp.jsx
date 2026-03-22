@@ -29,7 +29,7 @@ const SignUp = () => {
     setinput({ ...input, [e.target.name]: e.target.value });
   };
   const chageFileHandler = (e) => {
-    setinput({ ...input, file: e.target.file?.[0] });
+    setinput({ ...input, file: e.target.files?.[0] });
   };
 
   const SubmitHandler = async (e) => {
