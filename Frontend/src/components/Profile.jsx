@@ -14,7 +14,7 @@ const isResume = true;
 const Profile = () => {
   const [open, setopen] = useState(false);
   const { user } = useSelector((store) => store.auth);
-  console.log(user?.profile?.resume);
+  // console.log(user?.profile?.resume);
 
   return (
     <div>
@@ -23,7 +23,7 @@ const Profile = () => {
         <div className="flex justify-between">
           <div className="flex items-center gap-4">
             <Avatar className="h-24 w-24">
-              <AvatarImage src="https://github.com/shadcn.png" alt="profile" />
+              <AvatarImage src={user?.profile?.profilePhoto || "/default-avatar.png"} alt="profile" />
             </Avatar>
             <div>
               <h1 className="font-medium text-xl">{user?.fullname}</h1>
@@ -44,7 +44,7 @@ const Profile = () => {
             <span>{user?.email}</span>
           </div>
           <div className="flex items-center gap-3 text-sm my-2">
-            <Contact />
+            <Contact />            
             <span>{user?.phoneNumber}</span>
           </div>
         </div>
@@ -73,7 +73,7 @@ const Profile = () => {
               href={`https://docs.google.com/gview?url=${encodeURIComponent(user?.profile?.resume)}&embedded=true`}
               target="_blank"
               rel="noopener noreferrer"
-              className="text-blue-500"
+              className="text-blue-500 hover:underline"
             >
               {user?.profile?.resumeOriginalName}
             </a>

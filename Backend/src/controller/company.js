@@ -1,4 +1,6 @@
 const Company = require("../model/Company.js");
+const getDataUri = require("../utils/dataUri");
+const cloudinary = require("../utils/Cloudinary");
 
 const registerCompany = async (req, res) => {
   try {
@@ -78,7 +80,6 @@ const updateCompanyInfo = async (req, res) => {
   try {
     const companyId = req.params.id;
 
-    // Allowed fields
     const { name, description, website, location } = req.body;
 
     const updateData = {};
@@ -88,13 +89,14 @@ const updateCompanyInfo = async (req, res) => {
     if (website) updateData.website = website;
     if (location) updateData.location = location;
 
-    // If logo uploaded
     if (req.file) {
-      updateData.logo = req.file.path; // cloudinary url or file path
+      const fileUri = getDataUri(req.file);
+      const cloudResponse = await cloudinary.uploader.upload(fileUri.content);
+      updateData.logo = cloudResponse.secure_url;
     }
 
     const company = await Company.findByIdAndUpdate(companyId, updateData, {
-      returnDocument: "after",
+      new: true, 
       runValidators: true,
     });
 
@@ -112,8 +114,9 @@ const updateCompanyInfo = async (req, res) => {
     });
   } catch (error) {
     console.error("Update company error:", error);
+
     return res.status(500).json({
-      message: "Internal server error",
+      message: error.message || "Internal server error", // ✅ better debug
       success: false,
     });
   }
