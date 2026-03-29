@@ -14,7 +14,7 @@ const NavBar = () => {
   const { user } = useSelector((store) => store.auth);
   const dispatch = useDispatch();
   const navigate = useNavigate();
-  console.log("Redux User:", user);
+  // console.log("Redux User:", user);
   const logoutHandler = async () => {
     try {
       const res = await axios.get(`${USER_API_END_POINT}/logout`, {

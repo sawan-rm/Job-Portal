@@ -65,6 +65,8 @@ const CompanySetup = () => {
       setloading(false);
     }
   };
+  // console.log("singlecompany is :",singleCompany);
+  
   useEffect(() => {
     if (singleCompany) {
       setinput({
